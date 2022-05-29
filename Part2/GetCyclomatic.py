@@ -3,7 +3,7 @@ import csv
 
 input_file = 'avro-1.9.0.csv'
 suffix_pattern = '.java'
-cyclomatic = dict() # key : file_name, value : cyclomatic
+cyclomatic = dict() # key : file_name, value : cyclomatic, countlines
 save = [] # list of tuples: [(class or method, cyclomatic), ...]
 
 with open(input_file) as f:
@@ -13,7 +13,7 @@ with open(input_file) as f:
     for row in reader:
         if line_count != 0:
             if row[0] == 'File' and row[1].endswith(suffix_pattern): # .java file
-                cyclomatic[row[1]] = 0
+                cyclomatic[row[1]] = [0, int(row[3])]
             elif row[2] != '':
                 save.append((row[1], int(row[2])))
 
@@ -27,7 +27,7 @@ for stuff, c in save:
     # I don't know, just a fast way to implement
     for name in cyclomatic:
         if name.endswith(fixed_name):
-            cyclomatic[name] += 1
+            cyclomatic[name][0] += c
             matches += 1
 
 print(len(cyclomatic), matches)
@@ -58,9 +58,9 @@ prefix = 'lang/java/'
 
 with open(output_file, 'w') as f:
     writer = csv.writer(f, delimiter=',')
-    f.write('FilePath, Cyclomatic, Class\n')
+    f.write('FilePath, Cyclomatic, CountLines, Class\n')
 
     for name, c in cyclomatic.items():
         fixed_name = prefix + name
-        row = [fixed_name, c, 'bug-prone' if fixed_name in bugs else 'not-bug-prone']
+        row = [fixed_name, c[0], c[1], 'bug-prone' if fixed_name in bugs else 'not-bug-prone']
         writer.writerow(row)
