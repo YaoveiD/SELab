@@ -20,11 +20,12 @@ with open(input_file) as f:
     line_count = 0
 
     for row in reader:
-        if line_count != 0 and row[1] in keys:
+        if line_count != 0:
             if row[0] not in bug_count:
                 bug_count[row[0]] = 0
 
-            bug_count[row[0]] += 1
+            if row[1] in keys:
+                bug_count[row[0]] += 1
 
         line_count += 1
 
